@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL,
+});
 
 const categories = [
   { name: "Fresh Fruits", slug: "fruits", icon: "🍎" },
@@ -61,7 +63,7 @@ const products = [
 ];
 
 async function main() {
-  console.log("Seeding database for Food Fruit KH...");
+  console.log("Seeding database for KAKA KH SHOP...");
 
   const createdCategories: Record<string, string> = {};
   for (const cat of categories) {
