@@ -1,0 +1,73 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  icon        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int         @default(100)
+  imageUrl    String
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model TelegramUser {
+  id          String    @id // Telegram User ID as string
+  username    String?
+  firstName   String?
+  lastName    String?
+  phone       String?
+  orders      Order[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  telegramUserId  String?
+  telegramUser    TelegramUser? @relation(fields: [telegramUserId], references: [id], onDelete: SetNull)
+  customerName    String
+  customerPhone   String
+  deliveryAddress String
+  totalAmount     Float
+  status          String        @default("PENDING") // PENDING, PAID, PREPARING, DELIVERED, CANCELLED
+  paymentMethod   String        @default("KHQR")   // KHQR, ABA_PAYWAY, CASH_ON_DELIVERY
+  transactionId   String?       @unique
+  paidAt          DateTime?
+  notes           String?
+  items           OrderItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  title     String
+  price     Float
+  quantity  Int
+}
